@@ -1,0 +1,21 @@
+ 
+#POOL 4
+server="asplinux4";for i in {0..5}; do echo; echo; echo "$server$i"; ssh root@$server$i 'for i in {0..6}; do echo; echo tomcat-edi0$i; systemctl stop tomcat-edi0$i; sleep 1; systemctl start tomcat-edi0$i; systemctl status tomcat-edi0$i; done' ; sleep 200; done
+
+
+#POOL 3
+server="asplinux3"; for i in {0..5}; do echo; echo; echo "$server$i"; ssh root@$server$i 'for i in {0..6}; do echo; echo tomcat6-edi0$i; /etc/init.d/tomcat6-edi0$i stop; sleep 1; /etc/init.d/tomcat6-edi0$i start; /etc/init.d/tomcat6-edi0$i status; done' ; sleep 200; done
+
+
+#POOL 2
+server="asplinux3"; for i in {0..5}; do echo; echo; echo "$server$i"; ssh root@$server$i 'for i in {0..6}; do echo; echo tomcat6-edi0$i; /etc/init.d/tomcat6-edi0$i stop; sleep 1; /etc/init.d/tomcat6-edi0$i start; /etc/init.d/tomcat6-edi0$i status; done' ; sleep 200; done
+
+
+#POOL 1
+server="asplinux3"; for i in {0..5}; do echo; echo; echo "$server$i"; ssh root@$server$i 'for i in {0..6}; do echo; echo tomcat6-edi0$i; /etc/init.d/tomcat6-edi0$i stop; sleep 1; /etc/init.d/tomcat6-edi0$i start; /etc/init.d/tomcat6-edi0$i status; done' ; sleep 200; done
+
+
+#pool 0
+server="asplinux0";for i in {0..5}; do echo; echo; echo "$server$i"; ssh root@$server$i 'for i in {0..5}; do echo; echo tomcat-edi0$i; systemctl stop tomcat-edi0$i && sleep 1 && systemctl start tomcat-edi0$i && systemctl status tomcat-edi0$i; done' ; sleep 300; done
+
+

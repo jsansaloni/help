@@ -1,0 +1,4 @@
+
+ansible-playbook -vv -l ebi13 ebi.yml --diff --check
+
+ansible-playbook -vv -l ebi13 ebi.yml --diff

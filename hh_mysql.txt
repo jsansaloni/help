@@ -1,0 +1,15 @@
+# Dry run
+alter="";database="";table="";pt-online-schema-change --alter "$alter" u=root,p=2009sede,D=$database,t=$table --nocheck-plan --alter-foreign-keys-method auto --statistics  --dry-run
+
+
+# Execute pt
+alter="";database="";table="";pt-online-schema-change --alter "$alter" u=root,p=2009sede,D=$database,t=$table --nocheck-plan --alter-foreign-keys-method auto --statistics  --execute --max-load "Threads_running=200" --critical-load "Threads_running=300"
+
+# Mysql dump only eschema all DB
+mysqldump --no-data --databases --add-drop-database --add-drop-table --skip-add-locks --create-options --disable-keys --extended-insert --skip-lock-tables --quick --set-charset --skip-comments --flush-privileges --single-transaction -u root -p2009sede $BBDD > /tmp/$BBDD.sql
+
+# Mysql dump simple
+mysqldump -uroot -p roundcubemail > /tmp/roundcubemail.sql
+
+# Mysql restore
+mysql -uroot -p roundcubemail < /var/lib/mysql/roundcubemail.sql

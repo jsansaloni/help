@@ -1,0 +1,74 @@
+Install kube cluster
+
+
+
+
+
+systemctl disable --now firewalld
+
+swapoff -a
+
+# Comentar swap partition
+/etc/fstab
+
+# Borramos la particion
+lvremove /dev/centos/swap
+
+root@kube-master:~yum downgrade docker-ce-cli-18.06.3.ce-3.el7
+
+
+systemctl start docker
+systemctl enable docker
+
+
+# MASTER
+root@kube-master:~kubeadm init --config kubeadm-config.yaml
+[init] Using Kubernetes version: v1.13.4
+
+root@kube-master:~kubeadm init --pod-network-cidr=10.50.0.0/16
+
+
+# WORKER
+#kubeadm join 192.168.50.60:6443 --token 3f94vl.bdaxc34ldwpd28ao --discovery-token-ca-cert-hash sha256:9d4646cb3a49b80156d95707511eab0b54c7371ff0928bb0a70da0b3af345042
+kubeadm join 192.168.50.60:6443 --token gh4z0r.a6kdrfqb76o9wfe5 --discovery-token-ca-cert-hash sha256:8c2236ab66d50bfeb63d49e92c59f2ea52fc09d3e0bd962cd27bcd4042429690
+
+
+# KUBECONFIG
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+# CALICO solo nodes
+kubectl apply -f https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+
+curl https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml|sed s/192\.168/10.50/g | kubectl apply -f -
+
+export KUBECONFIG=$HOME/.kube/confign
+
+
+kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
+
+
+kubectl expose deployment hello-node --type=LoadBalancer --port=8080
+
+kubectl config view
+	apiVersion: v1
+	clusters:
+	- cluster:
+	    certificate-authority-data: DATA+OMITTED
+	    server: https://192.168.50.60:6443
+	  name: kubernetes
+	contexts:
+	- context:
+	    cluster: kubernetes
+	    user: kubernetes-admin
+	  name: kubernetes-admin@kubernetes
+	current-context: kubernetes-admin@kubernetes
+	kind: Config
+	preferences: {}
+	users:
+	- name: kubernetes-admin
+	  user:
+	    client-certificate-data: REDACTED
+	    client-key-data: REDACTED

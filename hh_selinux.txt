@@ -1,0 +1,36 @@
+
+listado modulos
+ semodule -l | grep -i keepalived
+ semodule --list-modules=full | grep -i keepalived
+
+
+Crear Modulos (tools)
+ yum install policycoreutils-python setools-console
+ seauditor.sh  all
+ cat *  | grep -v "#" | sort -u > all-module.txt
+ allow2te all.txt
+ semerge keepalived (EN CASO QUE HAYA DUPLICADOS)
+
+
+Instalar modulos
+ #checkmodule -C -m -o keepalived.cil keepalived_t.te (no hace falta crear el .cil)
+ checkmodule -M -m -o keepalived.mod keepalived_t.te
+
+ semodule_package -m keepalived.mod -o module_name.pp
+
+ semodule -l | grep -i keepalived
+ semodule -vi keepalived.pp
+ semodule -l | grep -i keepalived
+
+
+Buscar errores 
+ ausearch --debug -i -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR 
+ ausearch --debug -i -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR | awk -F 'comm=' '{print $2}' | awk '{print $1}' | sort -u | xargs
+
+
+Hacer que todos los modulos escupan al don audit (disable don audit)
+ semodule -DB
+
+Dejar los modulos como estaban en un inicio
+ semodule -B
+

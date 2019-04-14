@@ -1,0 +1,18 @@
+Consultar el estado del cluster: 
+curl -XGET http://c04a:8902/_cluster/health?pretty -s   
+curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/state?pretty -s 
+
+CHECK SETTINGS (entre ellas si el reallocation está ON/OFF):
+curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/settings?pretty
+
+
+Consultar el estado de todos los nodos de un cluster:
+curl  -XGET "http://c04a:8902/_nodes/_all/info?pretty" -s
+
+Consultar el estado de un nodo en concreto:
+curl -XGET 'http://c04a:8902/_nodes/c04a/stats?pretty' -s
+
+Consultar Info y estadísticas del cluster (docs., tamaño, etc)
+curl -XGET "http://c04a:8902/_stats?pretty" -s
+
+
