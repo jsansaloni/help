@@ -1,0 +1,25 @@
+# Lista maquinas virtuales
+virsh list --all
+
+
+# snapshot 
+virsh snapshot-create-as –domain {vm_name} –name {snapshot_name} –description  “enter description here”
+
+
+# Lista informacion sobre el snapshot
+virsh snapshot-info --domain webserver --snapshotname webserver_snap
+
+# Ver tamaño del snapshot
+qemu-img info /var/lib/libvirt/images/snaptestvm.img
+
+
+# Restaurar un vm a un snapshot
+virsh snapshot-revert {vm_name} {snapshot_name}
+
+# Lista snapshots
+virsh snapshot-list --domain webserver
+
+# Borrar un snapshot
+virsh snapshot-delete --domain webserver --snapshotname webserver_snap
+
+
