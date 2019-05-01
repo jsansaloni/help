@@ -1,0 +1,7 @@
+pvcreate /dev/sdb
+pvcreate --dataalignment 1024k /dev
+
+vgcreate 4tb /dev/sdb
+
+
+lvcreate -n images -L 500G 4tb
