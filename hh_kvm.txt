@@ -1,8 +1,27 @@
 # Lista maquinas virtuales
 virsh list --all
 
+# Definicion maquina
+virsh dumpxml VMNAME > domxml.xml
 
-# snapshot 
+# Define una maquina nueva desde un xml
+virsh define domxml.xml
+
+
+# NET
+################################
+virsh net-dumpxml > netxml.xml 
+
+virsh net-define netxml.xml 
+
+virsh net-start NETNAME 
+
+virsh net-autostart NETNAME
+
+
+
+# SNAPSHOT
+############################### 
 virsh snapshot-create-as –domain {vm_name} –name {snapshot_name} –description  “enter description here”
 
 

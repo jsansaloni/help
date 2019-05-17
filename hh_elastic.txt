@@ -15,4 +15,5 @@ curl -XGET 'http://c04a:8902/_nodes/c04a/stats?pretty' -s
 Consultar Info y estadísticas del cluster (docs., tamaño, etc)
 curl -XGET "http://c04a:8902/_stats?pretty" -s
 
-
+Estdo indices
+curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://172.16.1.246:8932/_cat/indices?pretty&pretty' -s  | grep -v "green"
