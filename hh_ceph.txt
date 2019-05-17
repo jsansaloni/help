@@ -1,0 +1,71 @@
+# Desde un nodo de ceph
+##################################
+
+	#	POOLS
+	#################
+	# Listar pools
+	ceph osd lspools
+
+	# Crear pool
+	ceph osd pool create cephfs_data 512
+
+	#Borrar pools (Hay que borrar los pools porque hay datos en ellos y si hay datos no puedes crear el fs)
+	ceph tell mon.* injectargs --mon-allow-pool-delete=true (deshabilitar la protección)
+	ceph osd pool rm cephfs_metadata cephfs_metadata --yes-i-really-really-mean-it
+	ceph tell mon.* injectargs --mon-allow-pool-delete=false (volver a habilitar la protección)
+
+
+	#	FS
+	#################
+	# Listar FS
+	ceph fs ls
+
+	# Creamos FS 
+	ceph fs new mapweb cephfs_metadata cephfs_data (pools asociados)
+
+	# Borrar FS
+	systemctl stop ceph-mds@cephesbs01p[a/b].service (parar todos los mds)
+	ceph fs rm mapnet --yes-i-really-mean-it
+		
+
+
+	# Montar el cephFS
+	mount -t ceph 172.16.8.92:6789:/ /mnt/tmp -o name=mds.mapweb,secret=AQBKnt5cJSELDxAASbHTjpJEICIZpj7EUyx+KA==
+
+
+	# 	Users
+	#################
+
+	# Listar usuarios
+	ceph auth ls
+
+	# Ver usuario
+	ceph auth get client.mds.mapweb
+
+	# Crear usuario
+	ceph auth get-or-create client.mds.mapweb mon 'allow r' mds 'allow *'
+
+	# Borrar usuario
+	ceph auth rm client.mds.mapweb
+
+	# Moidificar permisos
+	 ceph auth caps client.mds.mapweb mon 'allow r' mds 'allow rw' osd 'allow rwx pool=cephfs_metadata,allow rwx pool=cephfs_data'
+
+
+
+	# Borrar pool
+	systemctl stop ceph-mds@cephesbs01a.service
+	systemctl stop ceph-mds@cephesbs01b.service
+
+	Borramos el FS
+	[root@cephesbs01a ~]# ceph fs rm mapnet --yes-i-really-mean-it
+	[root@cephesbs01a ~]# ceph fs ls
+	No filesystems enabled
+
+# Desde Cephadmin
+##################################
+	ssh root@172.16.2.39
+	su - deploy
+
+	# Instalamos el mds service
+	ceph-deploy mds create cephesbs01a
