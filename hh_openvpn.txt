@@ -1,0 +1,7 @@
+
+tar cvfz - * | openssl enc -e -aes256 -out keys.tar.gz
+
+adri@vpn:~openssl enc -d -aes256 -in keys.tar.gz > decrypted.tar.gz
+
+
+tar xvfz decrypte.tar.gz

@@ -41,11 +41,14 @@
 
 	# Buckets
 	radosgw-admin bucket list
+        radosgw-admin bucket link --uid=<bucket_owner> --bucket=<bucket_name> --bucket-id=<bucket_id>
+
 
 	# User RGW
 	radosgw-admin user list
 	radosgw-admin user create --uid=mapweb --display-name=mapweb
 	radosgw-admin user info --uid=mapweb
+
 
 	# Buckets from s3cmd
 	s3cmd -c /home/ad/jsansaloni/s3cfg_sbs_mapweb mb s3://mapweb_p5
