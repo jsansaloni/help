@@ -1,7 +1,31 @@
 
+# Encrypt
 tar cvfz - * | openssl enc -e -aes256 -out keys.tar.gz
 
-adri@vpn:~openssl enc -d -aes256 -in keys.tar.gz > decrypted.tar.gz
-
-
+# Decrypt
+openssl enc -d -aes256 -in keys.tar.gz > decrypted.tar.gz
 tar xvfz decrypte.tar.gz
+
+
+
+# 	CA
+#########################
+# create CA — ca.crt and ca.key — which make up the public and private sides of an SSL certificate. 
+	nano vars
+	/easyrsa build-ca nopass 
+
+# Certificate
+	# Creating the Server Certificate, Key, and request
+	./easyrsa gen-req server nopass
+
+	# Import request
+	./easyrsa import-req /tmp/server.req server
+
+	# sign the request by running the easyrsa script with the sign-req option, followed by the request type and the common name. The request type can either be client or server, so for the OpenVPN server’s certificate request, be sure to use the server request type:
+	./easyrsa sign-req server server 
+
+# Diffie-Hellman
+	# Create a strong Diffie-Hellman key to use during key exchange by typing:
+	./easyrsa gen-dh
+
+

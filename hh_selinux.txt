@@ -23,6 +23,8 @@ Instalar modulos
  semodule -l | grep -i keepalived
 
 
+modulo=;checkmodule -M -m -o "$modulo".mod "$modulo".te && semodule_package -m "$modulo".mod -o "$modulo".pp && semodule -vi "$modulo".pp
+
 Buscar errores 
  ausearch --debug -i -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR -ts today
  ausearch --debug -i -m AVC,USER_AVC,SELINUX_ERR,USER_SELINUX_ERR -ts today | awk -F 'comm=' '{print $2}' | awk '{print $1}' | sort -u | xargs

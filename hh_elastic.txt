@@ -22,3 +22,6 @@ curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://
 Estado de las colas
 curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8902/_cat/thread_pool/?v&h=node_name,host,name,port,queue,queue_size,rejected,active,size,min,max,keep_alive'
 
+
+Colas ESM
+curl -kXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/thread_pool/?v' -s

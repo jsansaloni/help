@@ -1,10 +1,17 @@
 
 kubectl get pods
 
-kubectl get events
+kubectl get pods X -o yaml
 
+kubectl get events
 
 kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
 
 
 kubectl config view
+
+# Entrar en el shel del container
+kubectl exec -it gitlab-gitaly-0  -n pre /bin/bash
+
+# LOGS
+kubectl logs -f --tail=40 gitlab-gitaly-0

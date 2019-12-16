@@ -2,6 +2,7 @@ pvcreate /dev/sdb
 pvcreate --dataalignment 1024k /dev
 
 vgcreate 4tb /dev/sdb
+vgextend data /dev/sdb # Add new pv to a vg.
 
 
 lvcreate -n images -L 500G 4tb

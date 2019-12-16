@@ -55,7 +55,7 @@
 
  	s3cmd -c /home/ad/jsansaloni/s3cfg_sbs_mapweb ls
 
-
+        s3cmd del --recursive --force s3://25.01.2019
 
 
 	# 	Users
