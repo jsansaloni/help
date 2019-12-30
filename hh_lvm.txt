@@ -6,3 +6,9 @@ vgextend data /dev/sdb # Add new pv to a vg.
 
 
 lvcreate -n images -L 500G 4tb
+lvdisplay
+lvresize -L +500G /dev/mapper/4tb-images
+
+xfs_growfs /dev/data/backup
+btrfs filesystem resize max /var/lib/libvirt/images
+

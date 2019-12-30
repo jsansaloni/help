@@ -25,3 +25,9 @@ curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://
 
 Colas ESM
 curl -kXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/thread_pool/?v' -s
+
+# KUBECONFIG
+file=admin.conf.old; echo "$(cat $file| grep -i certificate | grep client |awk  '{print $2}')" | base64 -d > /tmp/tmpfile; openssl x509 -in /tmp/tmpfile -text -noout
+kubeadm alpha kubeconfig user --client-name kubernetes-admin --org system:masters > admin.conf
+file=admin.conf ; echo "$(cat $file| grep -i certificate | grep client |awk  '{print $2}')" | base64 -d > /tmp/tmpfile; openssl x509 -in /tmp/tmpfile -text -noout
+

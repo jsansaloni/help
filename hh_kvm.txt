@@ -31,6 +31,8 @@ virsh snapshot-info --domain webserver --snapshotname webserver_snap
 # Ver tamaño del snapshot
 qemu-img info /var/lib/libvirt/images/snaptestvm.img
 
+# Resize img
+qemu-img resize image.qcow2 +SIZE
 
 # Restaurar un vm a un snapshot
 virsh snapshot-revert {vm_name} {snapshot_name}
