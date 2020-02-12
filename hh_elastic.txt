@@ -31,3 +31,7 @@ file=admin.conf.old; echo "$(cat $file| grep -i certificate | grep client |awk  
 kubeadm alpha kubeconfig user --client-name kubernetes-admin --org system:masters > admin.conf
 file=admin.conf ; echo "$(cat $file| grep -i certificate | grep client |awk  '{print $2}')" | base64 -d > /tmp/tmpfile; openssl x509 -in /tmp/tmpfile -text -noout
 
+
+DARLE TRAYA
+curl -skXPUT --user elastic:X4Elastyc -H 'Content-Type: application/json'  https://elasticesm.edicom.es:443/_cluster/settings?pretty -d ' {"persistent" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "10", "cluster_concurrent_rebalance" : "10", "node_initial_primaries_recoveries" : "10"  } } } } }'
+

@@ -1,8 +1,8 @@
 # Desde un nodo de ceph
 ##################################
 
-	#	POOLS
-	#################
+#	POOLS
+#################
 	# Listar pools
 	ceph osd lspools
 
@@ -19,8 +19,8 @@
 	ceph osd pool rm cephfs_metadata cephfs_metadata --yes-i-really-really-mean-it
 	ceph tell mon.* injectargs --mon-allow-pool-delete=false (volver a habilitar la protección)
 
-	#	FS (MDS)
-	#################
+#	FS (MDS)
+#################
 	# Listar FS
 	ceph fs ls
 
@@ -36,18 +36,19 @@
 	mount -t ceph 172.16.8.92:6789:/ /mnt/tmp -o name=mds.mapweb,secret=AQBKnt5cJSELDxAASbHTjpJEICIZpj7EUyx+KA==
 
 
-	# RGW
-	#################
+# RGW (BUCKETS)
+#################
 
 	# Buckets
 	radosgw-admin bucket list
         radosgw-admin bucket link --uid=<bucket_owner> --bucket=<bucket_name> --bucket-id=<bucket_id>
 
 
-	# User RGW
+	# User RGW (https://docs.ceph.com/docs/mimic/radosgw/admin/)
 	radosgw-admin user list
 	radosgw-admin user create --uid=mapweb --display-name=mapweb
 	radosgw-admin user info --uid=mapweb
+	radosgw-admin user modify --uid=johndoe --display-name="John E. Doe" --access=full
 
 
 	# Buckets from s3cmd
@@ -55,11 +56,18 @@
 
  	s3cmd -c /home/ad/jsansaloni/s3cfg_sbs_mapweb ls
 
-        s3cmd del --recursive --force s3://25.01.2019
+    s3cmd del --recursive --force s3://25.01.2019
+
+# OBJECTS
+##################
+        rbd list # Lista imagenes
+        rbd rm imageName # Borra la image
 
 
-	# 	Users
-	#################
+
+
+# 	Ceph Users
+#################
 
 	# Listar usuarios
 	ceph auth ls
@@ -78,10 +86,24 @@
 
 
 
-# Desde Cephadmin
+# Desde Cephadmin Deploy
 ##################################
 	ssh root@172.16.2.39
 	su - deploy
 
 	# Instalamos el mds service
 	ceph-deploy mds create cephesbs01a
+
+
+
+# TOOLS
+##################################
+
+s3cmd --config=/root/.s3cfgp10x mb s3://test-aws						# Create Bucket
+s3cmd --config=/root/.s3cfgp10x rb --recursive --force s3://25.01.2019  # Delete Bucket
+s3cmd --config=/root/.s3cfgp10x ls s3://test-aws/online/				# Lista Contenido
+s3cmd --config=/root/.s3cfgp10x rm --recursive --force s3://test-aws/	# Borrar Contenido
+
+aws s3api --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80  create-bucket --bucket test-aws 	# Create Bucket
+aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 ls s3://test-aws/online/ 				# Lista Contenido
+aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 cp --recursive /mnt/backup/online/ok.full s3://test-aws/online/  # Subir Contenido
