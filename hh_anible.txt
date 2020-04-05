@@ -3,3 +3,7 @@ ansible-playbook -vv -l ebi13 ebi.yml --diff --check
 
 # Para ejecutar en una maquina en concreto
 ansible-playbook -vv -l ebi13 ebi.yml --diff
+
+
+# Para ejecutar en una maquina en concreto
+ansible-playbook -vv --private-key /home/jsansaloni/.ssh/josanme/josanme.es -i ./inventory.ini -l 192.168.50.20 towerserver.yaml --diff

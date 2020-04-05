@@ -10,3 +10,6 @@ ssacli ctrl slot=3 array B delete
 
 # create raid0
 ssacli ctrl slot=0 create type=ld drives=2I:1:21,2I:1:22,2I:1:23,2I:1:24,2I:1:25 raid=0 stripsize=1024 sectors=32 forced
+
+# Modo HBA
+ssacli controller slot=0 modify hbamode=on

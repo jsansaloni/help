@@ -1,0 +1,12 @@
+# Abrir discos de backup
+cryptsetup luksOpen /dev/sdb2 backup 	#jKvElC2M...... # Pass en syspass
+mount /dev/mapper/backup /mnt/tmp/
+
+# Cerrar discos de backup
+umount /mnt/tmp
+cryptsetup luksClose backup
+
+
+# Para buscar el backup en que disco esta
+mysql -uroot -p -h 172.16.1.168 -D backup_catalog -e "select * from sedeb2b where grupo_asp like '56';
+

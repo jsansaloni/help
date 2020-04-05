@@ -35,3 +35,9 @@ file=admin.conf ; echo "$(cat $file| grep -i certificate | grep client |awk  '{p
 DARLE TRAYA
 curl -skXPUT --user elastic:X4Elastyc -H 'Content-Type: application/json'  https://elasticesm.edicom.es:443/_cluster/settings?pretty -d ' {"persistent" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "10", "cluster_concurrent_rebalance" : "10", "node_initial_primaries_recoveries" : "10"  } } } } }'
 
+Quitarle el tag de hotwarm
+curl -XPUT -H 'Content-Type: application/json' -u elastic:X4Elastyc "http://${ip_cluster}/${indice}/_settings" -d '{  "settings": { "index.routing.allocation.require.box_type" : null } }'
+
+
+Crear snapshot
+curl --user "elastic:X4Elastyc" -sSkLXGET 'ela01c:8922/_snapshot/backup_elapool1/_all?pretty' | grep -E "\"state\"|\"snapshot\" : \"elapool1"

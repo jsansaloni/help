@@ -1,3 +1,27 @@
+# INIT HELM
+##################
+
+# V2
+#####
+#namespace="velero"
+#helm init --tiller-namespace $namespace
+#kubectl create serviceaccount -n $namespace tiller
+#kubectl create clusterrolebinding tiller-"$namespace" --clusterrole=cluster-admin --serviceaccount="$namespace":tiller
+#kubectl patch deploy -n $namespace tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+#
+#helm  --tiller-namespace $namespace list
+#
+#helm install --tiller-namespace $namespace --namespace $namespace ./ --name mysql  --values mysql-mamute-ksysn.yaml
+
+
+# V3
+#####
+helm install velero --namespace velero ./ --values values.yaml 
+
+
+
+# KUBECTL USUAL COMMANDS
+##########################
 
 kubectl get pods
 
@@ -7,11 +31,13 @@ kubectl get events
 
 kubectl create deployment hello-node --image=gcr.io/hello-minikube-zero-install/hello-node
 
-
-kubectl config view
+kubectl cm view
 
 # Entrar en el shel del container
 kubectl exec -it gitlab-gitaly-0  -n pre /bin/bash
 
 # LOGS
 kubectl logs -f --tail=40 gitlab-gitaly-0
+
+# Copy Data to POD
+kubectl -n edicomqa cp mamute.sql edicomqa/mysql-7bb7f5d897-l4dgl:/root/

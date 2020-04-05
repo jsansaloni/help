@@ -1,0 +1,172 @@
+# Abrirlo con un screen
+while true;do bkDate=$(date '+%Y%m%d_%H%M%S'); status=$(curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' https://elasticesm.edicom.es:443/_cluster/health?pretty -s|jq ".status"); echo "$bkDate $status" >> /tmp/esm_status.log ; sleep 60 ;done
+
+
+# Si se pone en rojo es porque hay un indice que no se ha podido realocar los shards.
+
+# Para ver que shards no se han assignado tenemos els siguiente curl
+curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/shards?v' | grep -vi "started"
+
+
+# Para ver que el porque no ha asignado los shards, normalmente lo reintenta 5 veces y si con eso no puede lo deja de intentar, hay que forzarlo a mano
+curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cluster/allocation/explain?pretty'
+  # "explanation" : "shard has exceeded the maximum number of retries [5] on failed allocation attempts - manually call [/_cluster/reroute?retry_failed=true] to retry, [unassigned_info[[reason=ALLOCATION_FAILED], at[2019-12-18T02:58:51.824Z], failed_attempts[5], delayed=false, details[failed shard on node [5MYHb4PqSqmWD36wkcq8Iw]: failed to create shard, failure IOException[failed to obtain in-memory shard lock]; nested: ShardLockObtainFailedException[[.monitoring-es-6-2019.12.18][0]: obtaining shard lock timed out after 5000ms]; ], allocation_status[deciders_no]]]"
+
+
+
+# Para solucionarlo
+curl -skXPOST --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cluster/reroute?retry_failed=true'
+
+
+
+# Abrir en dos consolas los siguientes watch para ver como esta el cluster
+watch "curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' https://elasticesm.edicom.es:443/_cluster/health?pretty -s"
+# cluster_name" : "esm",
+#   "status" : "green",
+#   "timed_out" : false,
+#   "number_of_nodes" : 9,
+#   "number_of_data_nodes" : 3,
+#   "active_primary_shards" : 36,
+#   "active_shards" : 72,
+#   "relocating_shards" : 0,
+#   "initializing_shards" : 0,
+#   "unassigned_shards" : 0,
+#   "delayed_unassigned_shards" : 0,
+#   "number_of_pending_tasks" : 0,
+#   "number_of_in_flight_fetch" : 0,
+#   "task_max_waiting_in_queue_millis" : 0,
+
+
+
+watch "curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/nodes?v'|sort -k2"
+
+
+
+# Si vemos que se caen nodos cada rato y cada vez hay mas SHARDS unnassigned matamos todos los nodos del cluster
+kksysn -n esm delete pod esm-client-0 esm-client-1 esm-client-2 esm-master-0 esm-master-1 esm-master-2 esm-data-0 esm-data-1 esm-data-2
+
+
+# Para vigilar ahora el estado del cluster hay que entrar dentro de un pod y lanzar el curl, para ello:
+kknewsys -n esm exec -ti esm-master-0 bash
+
+
+# I ahora que estamos dentro lanzamos el curl
+watch "curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' http://localhost:9200/_cluster/health?pretty -s"
+# {
+#   "cluster_name" : "esm",
+#   "status" : "yellow",
+#   "timed_out" : false,
+#   "number_of_nodes" : 9,
+#   "number_of_data_nodes" : 3,
+#   "active_primary_shards" : 36,
+#   "active_shards" : 44,
+#   "relocating_shards" : 0,
+#   "initializing_shards" : 4,
+#   "unassigned_shards" : 24,
+#   "delayed_unassigned_shards" : 11,
+#   "number_of_pending_tasks" : 4,
+#   "number_of_in_flight_fetch" : 0,
+#   "task_max_waiting_in_queue_millis" : 9158,
+#   "active_shards_percent_as_number" : 61.111111111111114
+# }
+
+
+
+ curl -XPUT http://localhost:9200/_cluster/settings?pretty -d '
+ { "persistent" : 
+    { "cluster" : 
+       {"routing" : 
+          {"allocation" : 
+             {"node_initial_primaries_recoveries" : "100" 
+             } 
+          }
+       }
+    }
+ }'
+
+
+
+curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/shards?v' | grep "gb"
+# .monitoring-es-6-2019.12.26       0     r      STARTED 55049004  28.2gb 10.80.167.136 esm-data-1
+# .monitoring-es-6-2019.12.26       0     p      STARTED 55048987  28.3gb 10.80.210.212 esm-data-3
+# .monitoring-es-6-2019.12.25       0     p      STARTED 75502151  46.7gb 10.80.66.87   esm-data-0
+# .monitoring-es-6-2019.12.25       0     r      STARTED 75502151  46.7gb 10.80.167.136 esm-data-1
+# .monitoring-es-6-2019.12.21       0     r      STARTED 64285597  33.3gb 10.80.66.87   esm-data-0
+# .monitoring-es-6-2019.12.21       0     p      STARTED 64285597  33.3gb 10.80.154.47  esm-data-2
+# .monitoring-es-6-2019.12.22       0     r      STARTED 55204931  36.7gb 10.80.66.87   esm-data-0
+# .monitoring-es-6-2019.12.22       0     p      STARTED 55204931  36.7gb 10.80.154.47  esm-data-2
+# .monitoring-es-6-2019.12.24       0     r      STARTED 45799145    33gb 10.80.167.136 esm-data-1
+# .monitoring-es-6-2019.12.24       0     p      STARTED 45799145    33gb 10.80.210.212 esm-data-3
+# .monitoring-es-6-2019.12.23       0     r      STARTED 40879408  26.1gb 10.80.167.136 esm-data-1
+# .monitoring-es-6-2019.12.23       0     p      STARTED 40879408  26.1gb 10.80.210.212 esm-data-3
+
+
+
+
+
+curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_template/.monitoring-es?pretty'
+{
+  ".monitoring-es" : {
+    "order" : 0,
+    "version" : 6070299,
+    "index_patterns" : [
+      ".monitoring-es-6-*"
+    ],
+    "settings" : {
+      "index" : {
+        "format" : "6",
+        "codec" : "best_compression",
+        "number_of_shards" : "3",
+        "auto_expand_replicas" : "0-1",
+        "number_of_replicas" : "0"
+      }
+    },
+
+
+curl -skXPUT --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_template/.monitoring-es' -d 
+'{
+    "order" : 0,
+    "version" : 6070700,
+    "index_patterns" : [
+      ".monitoring-es-6-*"
+    ],
+    "settings" : {
+      "index" : {
+        "format" : "6",
+        "codec" : "best_compression",
+        "number_of_shards" : "5",
+        "auto_expand_replicas" : "0-1",
+        "number_of_replicas" : "0"
+      }
+    },
+    "mappings" : {
+      "doc" : {
+    .......
+      }
+    },
+    "aliases" : { }
+  }'
+
+
+
+jsansaloni@ED1982>15:44[k8s] curl -skXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_template/.monitoring-es?pretty'  | head -n 20
+{
+  ".monitoring-es" : {
+    "order" : 0,
+    "version" : 6070500,
+    "index_patterns" : [
+      ".monitoring-es-6-*"
+    ],
+    "settings" : {
+      "index" : {
+        "format" : "6",
+        "codec" : "best_compression",
+        "number_of_shards" : "3",
+        "auto_expand_replicas" : "0-1",
+        "number_of_replicas" : "0"
+      }
+    },
+    "mappings" : { },
+    "aliases" : { }
+  }
+}

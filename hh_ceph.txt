@@ -99,11 +99,25 @@
 # TOOLS
 ##################################
 
-s3cmd --config=/root/.s3cfgp10x mb s3://test-aws						# Create Bucket
-s3cmd --config=/root/.s3cfgp10x rb --recursive --force s3://25.01.2019  # Delete Bucket
-s3cmd --config=/root/.s3cfgp10x ls s3://test-aws/online/				# Lista Contenido
-s3cmd --config=/root/.s3cfgp10x rm --recursive --force s3://test-aws/	# Borrar Contenido
+# Create Bucket
+s3cmd --config=/root/.s3cfgp10x mb s3://test-aws						
+aws s3api --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80  create-bucket --bucket test-aws 	
 
-aws s3api --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80  create-bucket --bucket test-aws 	# Create Bucket
-aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 ls s3://test-aws/online/ 				# Lista Contenido
-aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 cp --recursive /mnt/backup/online/ok.full s3://test-aws/online/  # Subir Contenido
+# Delete Bucket
+s3cmd --config=/root/.s3cfgp10x rb --recursive --force s3://25.01.2019  
+
+# Lista Contenido
+s3cmd --config=/root/.s3cfgp10x ls s3://test-aws/online/				
+aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 ls s3://test-aws/online/ 				
+
+# Borrar Contenido
+s3cmd --config=/root/.s3cfgp10x rm --recursive --force s3://test-aws/	
+
+# Subir Contenido
+aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 cp --recursive /mnt/backup/online/ok.full s3://test-aws/online/  
+
+
+# Cephsys
+aws s3 --profile=cephsys --endpoint-url=http://192.168.0.25:80 ls s3://velero/backups/gitlab-backup/
+
+
