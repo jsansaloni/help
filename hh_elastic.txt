@@ -2,12 +2,30 @@ Consultar el estado del cluster:
 curl -XGET http://c04a:8902/_cluster/health?pretty -s   
 curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/state?pretty -s 
 
+
+##################################################################33
+ENABLE REALLOCATION:
+curl -XPUT --user elastic:X4Elastyc-H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" }}'
+
+DISABLE REALLOCATION:
+curl -XPUT --user elastic:X4Elastyc -H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "none" }}'
+
 CHECK SETTINGS (entre ellas si el reallocation está ON/OFF):
 curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/settings?pretty
 
+# Donarli chicha
+curl -sSkLXPUT --user "elastic:X4Elastyc"  localhost:8922/_cluster/settings?pretty -d ' {"transient" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "200", "cluster_concurrent_rebalance" : "200", "node_initial_primaries_recoveries" : "200"  } } } } }' -H 'Content-Type: application/json'
+
+Estdo indices
+curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8932/_cat/indices?pretty&pretty' -s  | grep -v "green"
+
+Estado de las colas
+curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8902/_cat/thread_pool/?v&h=node_name,host,name,port,queue,queue_size,rejected,active,size,min,max,keep_alive'
 
 Consultar el estado de todos los nodos de un cluster:
 curl  -XGET "http://c04a:8902/_nodes/_all/info?pretty" -s
+
+##################################################################33
 
 Consultar el estado de un nodo en concreto:
 curl -XGET 'http://c04a:8902/_nodes/c04a/stats?pretty' -s
@@ -15,12 +33,7 @@ curl -XGET 'http://c04a:8902/_nodes/c04a/stats?pretty' -s
 Consultar Info y estadísticas del cluster (docs., tamaño, etc)
 curl -XGET "http://c04a:8902/_stats?pretty" -s
 
-Estdo indices
-curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8932/_cat/indices?pretty&pretty' -s  | grep -v "green"
 
-
-Estado de las colas
-curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8902/_cat/thread_pool/?v&h=node_name,host,name,port,queue,queue_size,rejected,active,size,min,max,keep_alive'
 
 
 Colas ESM

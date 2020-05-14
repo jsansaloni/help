@@ -41,3 +41,7 @@ kubectl logs -f --tail=40 gitlab-gitaly-0
 
 # Copy Data to POD
 kubectl -n edicomqa cp mamute.sql edicomqa/mysql-7bb7f5d897-l4dgl:/root/
+
+
+# Para ver los recursos que tienen la API
+kubectl api-resources -o wide

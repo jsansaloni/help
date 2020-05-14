@@ -9,6 +9,11 @@ virsh define domxml.xml
 
 virsh start nombre_maquina
 
+# VDEV
+################################
+qemu-img create -f raw ubunt20.04-BASE.raw 10G
+
+
 # NET
 ################################
 virsh net-dumpxml > netxml.xml 

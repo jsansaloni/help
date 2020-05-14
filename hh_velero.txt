@@ -1,0 +1,135 @@
+#================================================================================================
+#	Install velero
+#================================================================================================
+# Install Client
+wget https://github.com/vmware-tanzu/velero/releases/download/v1.3.1/velero-v1.3.1-linux-amd64.tar.gz
+tar xvfz velero-v1.3.1-linux-amd64.tar.gz 
+chmod a+x velero 
+sudo mv velero /usr/local/bin/ 
+
+
+
+# HELM: https://github.com/vmware-tanzu/helm-charts/tree/master/charts/velero
+aws s3api --profile=cephsys --endpoint-url=http://192.168.0.25:80 create-bucket --bucket velero
+
+
+helm install  --tiller-namespace $namespace --namespace $namespace  --name velero  \
+--set configuration.provider=aws \
+--set-file credentials.secretContents.cloud=/home/jsansaloni/git/k8s/helm-charts/velero/velero-credentials \
+--set configuration.backupStorageLocation.name=aws \
+--set configuration.backupStorageLocation.bucket=velero \
+--set configuration.backupStorageLocation.config.region=default \
+--set configuration.volumeSnapshotLocation.name=aws \
+--set configuration.volumeSnapshotLocation.config.region=default \
+--set image.repository=velero/velero \
+--set image.tag=v1.2.0 \
+--set image.pullPolicy=IfNotPresent \
+--set initContainers[0].name=velero-plugin-for-aws \
+--set initContainers[0].image=velero/velero-plugin-for-aws:v1.0.0 \
+--set initContainers[0].volumeMounts[0].mountPath=/target \
+--set initContainers[0].volumeMounts[0].name=plugins \
+stable/velero
+
+
+jsansaloni@ED1982>17:15[velero]helm install velero --namespace velero ./ --values values.yaml 
+NAME: velero
+LAST DEPLOYED: Tue Mar 31 17:16:01 2020
+NAMESPACE: velero
+.....
+
+More info on the official site: https://velero.io/docs
+
+
+
+
+# Borrar Velero
+kubectl delete ns velero
+	# namespace "velero" deleted
+
+kubectl delete crds backupstoragelocations.velero.io deletebackuprequests.velero.io downloadrequests.velero.io podvolumebackups.velero.io podvolumerestores.velero.io resticrepositories.velero.io restores.velero.io schedules.velero.io serverstatusrequests.velero.io volumesnapshotlocations.velero.io
+
+kubectl delete clusterrolebinding tiller-velero
+	# clusterrolebinding.rbac.authorization.k8s.io "tiller-velero" deleted
+
+kubectl delete clusterrolebinding velero-server
+	# clusterrolebinding.rbac.authorization.k8s.io "velero-server" deleted
+
+
+
+#================================================================================================
+#	Backups Restauraciones y Schedules con velero
+#================================================================================================
+
+
+velero backup create mysql-backup --include-namespaces mysql 
+	# Backup request "mysql-backup" submitted successfully.
+	# Run `velero backup describe mysql-backup` or `velero backup logs mysql-backup` for more details.
+
+aws s3 --profile=cephsys --endpoint-url=http://192.168.0.25:80 ls s3://velero/backups/mysql-backup/
+	# 2020-03-15 21:35:05       5731 mysql-backup-logs.gz
+	# 2020-03-15 21:35:05         29 mysql-backup-podvolumebackups.json.gz
+	# 2020-03-15 21:35:06        682 mysql-backup-resource-list.json.gz
+	# 2020-03-15 21:35:05         29 mysql-backup-volumesnapshots.json.gz
+	# 2020-03-15 21:35:05      27912 mysql-backup.tar.gz
+	# 2020-03-15 21:35:05        861 velero-backup.json
+
+
+velero restore create --from-backup mysql-backup
+	# Restore request "mysql-backup-20200315214801" submitted successfully.
+	# Run `velero restore describe mysql-backup-20200315214801` or `velero restore logs mysql-backup-20200315214801` for more details.
+
+
+# Error Two claims are bound to the same volume, this one is bound incorrectly
+kksysn patch pv pvc-796eb6a8-4ef4-46c3-a786-3088fe45daba -p '{"spec":{"claimRef": null}}'
+	# persistentvolume/pvc-e628c2bf-cb51-4f70-bc95-969beeba5835 patched
+
+# Borramos los pods evicted
+for pod in $(kworkspace -n mysql get pod | grep -i evicted |awk '{print $1}' | xargs); do kworkspace -n mysql delete pod ${pod}; done
+
+
+
+
+#============================================================================================
+#	Commands
+#============================================================================================
+
+velero backup create mysql-backup --include-namespaces mysql 
+velero backup logs mysql-backup
+velero backup describe mysql-backup
+
+velero backup get
+	# NAME           STATUS                      CREATED                         EXPIRES   STORAGE LOCATION   SELECTOR
+	# mysql-backup   PartiallyFailed (1 error)   2020-03-15 21:35:03 +0100 CET   14d       default            <none>
+
+
+velero restore create --from-backup mysql-backup
+velero restore describe mysql-backup-20200331152500
+velero restore logs mysql-backup-20200331152500
+
+
+
+velero schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
+velero create schedule gitlab-backup-scheduled --schedule="0 */6 * * *" --include-namespaces gitlab
+	# Schedule "gitlab-backup-scheduled" created successfully.
+
+
+
+velero schedule get
+	# NAME                      STATUS    CREATED                          SCHEDULE      BACKUP TTL   LAST BACKUP   SELECTOR
+	# gitlab-backup-scheduled   Enabled   2020-03-31 18:04:15 +0200 CEST   0 */6 * * *   720h0m0s     5h ago        <none>
+
+
+velero get schedules
+	# NAME            STATUS    CREATED                          SCHEDULE      BACKUP TTL   LAST BACKUP   SELECTOR
+	# backup-gitlab   Enabled   2020-03-31 18:01:52 +0200 CEST   0 */6 * * *   720h0m0s     35s ago       <none>
+
+aws s3 --profile=cephsys --endpoint-url=http://192.168.0.25:80 ls s3://velero/backups/
+                           PRE backup-gitlab-20200331160152/
+                           PRE gitlab-backup-scheduled-20200331160415/
+                           PRE gitlab-backup-scheduled-20200331180026/
+                           PRE gitlab-backup-scheduled-20200401000026/
+                           PRE gitlab-backup-scheduled-20200401060007/
+                           PRE gitlab-backup/
+                           PRE mysql-backup/
+
+velero version

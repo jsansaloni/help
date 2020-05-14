@@ -6,6 +6,8 @@ tar cvfz - * | openssl enc -e -aes256 -out keys.tar.gz
 openssl enc -d -aes256 -in keys.tar.gz > decrypted.tar.gz
 tar xvfz decrypte.tar.gz
 
+#Abrir certificados con el openssl
+openssl x509 -in todos.sedeb2b.com.crt -text -noout
 
 
 # 	CA
