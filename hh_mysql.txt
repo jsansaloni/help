@@ -13,3 +13,8 @@ mysqldump -uroot -p roundcubemail > /tmp/roundcubemail.sql
 
 # Mysql restore
 mysql -uroot -p roundcubemail < /var/lib/mysql/roundcubemail.sql
+
+#Create user owner DB
+GRANT ALL PRIVILEGES ON decueropro.* To 'decu3ropro'@'%' IDENTIFIED BY 'd3C03r0pro2020!';
+FLUSH PRIVILEGES;
+

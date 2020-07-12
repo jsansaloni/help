@@ -1,0 +1,75 @@
+# Dígito control Dian
+#######################################
+https://actualicese.com/herramientas/digito-verificacion/
+
+# Generar CSR
+#######################################
+
+ppmk --list | grep -i 890924034
+
+
+nit="8909240345-3"
+echo ${nit}
+
+ppmk --new ${nit}
+
+
+generatekey -m 1 pkcs11 certreq=yes plainname=${nit} protect=softcard softcard=${nit} recovery=yes type=RSA size=2048 nvram=no
+  embedsavefile: Filename to write key to? []
+  > 9007000618-2
+  [default sha1] > sha256 
+
+
+mv ${nit}_req ${nit}.csr
+
+scp root@cfdi04:/home/ad/jsansaloni/${nit}.csr .
+
+
+sincro simulaput secworld
+
+sincro put secworld
+
+# Tarea ref. https://apps.edicomgroup.com/JSys/#idstask|173716
+
+
+# IMPORTAR CERT A ECS
+#######################################
+
+nit=""
+echo ${nit}
+scp ${nit}.pem root@cfdi03:/home/ad/jsansaloni
+
+
+soft=$(find /opt/nfast/kmdata/local -name *$(ppmk -l | grep $nit | awk '{print $1}')* | grep key_pkcs11_uc | cut -d '_' -f3) ;
+echo $soft
+
+ckcerttool -c $nit -f $nit.pem -k $soft -L $nit 
+
+cklist -s $nit
+
+sincro simulaput secworld
+sincro put secworld
+
+reinicios --> TomcatFirma
+
+Importamos en ECS:
+Accedo a http://cfdi03:9124/EdicomCryptoServer/webfirma
+
+Miramos número de serie del certificado:
+Dispositivos > NSHIELD > Informacion Token
+Introduzco en Label (${nit}) para obtener el Numero de Serie del Certificado:
+
+
+# TAREA REF https://apps.edicomgroup.com/JSys/#idstask|204614
+
+
+-----
+Change pin sloot
+pkcs11-tool -l --module /opt/nfast/toolkits/pkcs11/libcknfast.so --slot-description '9006350888-2' --change-pin
+	# Logging in to "9006350888-2".
+	# Please enter User PIN: 			current_pass
+	# Please enter the current PIN: 	current_pass
+	# Please enter the new PIN: 		new_pass
+	# Please enter the new PIN again: 	new_pass
+	# PIN successfully changed
+

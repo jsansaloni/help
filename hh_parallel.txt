@@ -1,0 +1,24 @@
+src_path="/var/lib/libvirt/imagesraw"
+dst_path="/mnt/backup/imagesraw"
+parallel --gnu -j 8 --dry-run "rsync -ah --progress --inplace $src_path/{} -e 'ssh -i /root/.ssh/id_rsa' root@192.168.50.21:$dst_path/{}" ::: $(cd ${src_path} && find . -type f \( ! -iname "ubuntu-storj*" ! -iname "Dockers-2.raw" \)  )
+
+dst_path="/var/lib/libvirt/images"
+src_path="/mnt/backup/imagesraw"
+parallel --gnu -j 8 --dry-run "rsync -ah --progress --inplace -e 'ssh -i /root/.ssh/id_rsa' root@192.168.50.21:$src_path/{}  $dst_path/{}" ::: $( ssh  root@192.168.50.21 "cd ${src_path} && find . -type f " )
+
+src_path="/mnt/DATA/plex/app/videos"
+dst_path="/mnt/tmp/"
+parallel --gnu -j 8 --dry-run "rsync -ah --progress --inplace $src_path/{}  $dst_path/{}" ::: $( cd ${src_path} && find . -type f  )
+
+
+src_path="/mnt/data"
+dst_path="/mnt/tmp"
+parallel --gnu -j 8 --dry-run "mkdir -p $dst_path/{}" ::: $( cd ${src_path} && find . -type d )
+parallel --gnu -j 10 --dry-run "rsync -ah --progress --inplace $src_path/{}  $dst_path/{}" ::: $( cd ${src_path} && find . -type f  )
+
+
+src_path="/mnt/backup/data"
+dst_path="/mnt/intercambio/data-s3-aws"
+parallel --gnu -j 8 --dry-run "mkdir -p $dst_path/{}" ::: $( ssh -i /root/.ssh/id_rsa root@192.168.50.21 "cd ${src_path} && find . -type d ")
+parallel --gnu -j 8 --dry-run "rsync -ah --progress --inplace -e 'ssh -i /root/.ssh/id_rsa' root@192.168.50.21:$src_path/{}  $dst_path/{}" ::: $( cd ${src_path} && find . -type f  -iname "/mnt/data/nextcloud/app/data/adri/" )
+

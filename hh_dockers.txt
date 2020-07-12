@@ -1,0 +1,2 @@
+# Para ver parámetros de un container
+docker inspect -f '{{ .Config.Env}} {{ .Config.Entrypoint}} {{ .Config.Cmd}} {{ .VolumesFrom}} {{.Volumes}}  {{ .HostConfig.links}}'  CONTAINER_ID

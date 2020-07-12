@@ -120,4 +120,6 @@ aws s3 --profile=cephXXp10 --endpoint-url=http://172.16.0.135:80 cp --recursive 
 # Cephsys
 aws s3 --profile=cephsys --endpoint-url=http://192.168.0.25:80 ls s3://velero/backups/gitlab-backup/
 
-
+# Checking
+#######################################
+ ceph osd df | awk -F " " "{if (\$11 > 60) print \$1,\$4,\$11}" | sort -rk 3
