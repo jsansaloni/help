@@ -37,7 +37,7 @@ sincro put secworld
 
 nit=""
 echo ${nit}
-scp ${nit}.pem root@cfdi03:/home/ad/jsansaloni
+scp ${nit}.pem root@cfdi04:/home/ad/jsansaloni
 
 
 soft=$(find /opt/nfast/kmdata/local -name *$(ppmk -l | grep $nit | awk '{print $1}')* | grep key_pkcs11_uc | cut -d '_' -f3) ;

@@ -23,7 +23,7 @@ helm install velero --namespace velero ./ --values values.yaml
 # KUBECTL USUAL COMMANDS
 ##########################
 
-kubectl get pods
+kubectl get pods --sort-by=.metadata.creationTimestamp
 
 kubectl get pods X -o yaml
 
