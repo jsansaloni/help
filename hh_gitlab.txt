@@ -1,0 +1,39 @@
+# Reset Variables (Error 500 bad decrypt)
+
+jsansaloni@ed4002>13:36[~]kkworkspace -n git exec -it gitlab-task-runner-85fdbdbdf6-rtgks -- bash
+git@gitlab-task-runner-85fdbdbdf6-rtgks:/$ cd /srv/gitlab/
+git@gitlab-task-runner-85fdbdbdf6-rtgks:/srv/gitlab$ bundle exec rake cache:clear RAILS_ENV=production
+git@gitlab-task-runner-85fdbdbdf6-rtgks:/srv/gitlab$ bundle exec rake db:migrate SKIP_SCHEMA_VERSION_CHECK=true
+
+
+
+
+git@gitlab-task-runner-85fdbdbdf6-tjwdh:/$ gitlab-rails dbconsole
+
+postgres=# SELECT * FROM public."ci_group_variables";
+
+postgres=#  SELECT * FROM public."ci_variables";
+
+postgres=#  DELETE FROM ci_group_variables;
+DELETE 36
+
+postgres=# DELETE FROM ci_variables;
+DELETE 40
+
+postgres=# UPDATE projects SET runners_token = null, runners_token_encrypted = null;
+UPDATE 699
+postgres=# UPDATE namespaces SET runners_token = null, runners_token_encrypted = null;
+UPDATE 336
+postgres=# UPDATE application_settings SET runners_registration_token_encrypted = null;
+UPDATE 1
+postgres=# UPDATE ci_runners SET token = null, token_encrypted = null;
+UPDATE 2
+postgres=# UPDATE ci_builds SET token = null, token_encrypted = null;
+UPDATE 313505
+
+postgres=# TRUNCATE web_hooks CASCADE;
+
+
+jsansaloni@ed4002>13:27[~]kkworkspace -n git delete pods  -l release=gitlab
+
+

@@ -18,6 +18,34 @@
 #####
 helm install velero --namespace velero ./ --values values.yaml 
 
+# Añadimos un repo de helm 
+helm repo add chartmuseum https://chartmuseum.edicomgroup.com --username edicom  --password 463ff0fc81fa
+
+# Ver el listado de repositorios
+helm repo list
+
+# Actualizamos los repositorios
+helm repo update
+
+
+# Buscamos los charts que tenemos en el repositorio 
+helm search chartmuseum
+
+
+# Subir un chart al chartmuseum 
+## Requisito previo
+helm plugin install https://github.com/chartmuseum/helm-push.git
+
+## Comprueba la sintaxis del chart
+helm3 lint .
+
+## Empaquetamos el chart en un tgz
+helm3 package .
+
+## Subimos el targz al repo
+helm3 push ceph-csi-rbd-3.3.1.tgz chartmuseum.edicomgroup.com
+
+
 
 
 # KUBECTL USUAL COMMANDS

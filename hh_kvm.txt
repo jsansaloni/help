@@ -13,6 +13,7 @@ virsh start nombre_maquina
 ################################
 qemu-img create -f raw ubunt20.04-BASE.raw 10G
 
+virsh attach-disk m0.k8s --source /var/lib/libvirt/images/vm-hdds/ubuntu20-m0.k8s-docker.raw --target vdb --persistent
 
 # NET
 ################################

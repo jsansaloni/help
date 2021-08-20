@@ -7,3 +7,99 @@ ansible-playbook -vv -l ebi13 ebi.yml --diff
 
 # Para ejecutar en una maquina en concreto
 ansible-playbook -vv --private-key /home/jsansaloni/.ssh/josanme/josanme.es -i ./inventory.ini -l 192.168.50.20 towerserver.yaml --diff
+
+
+# Ejecutar las tasks con los siguientes tags
+ansible-playbook example.yml --tags "configuration,packages"
+
+# Ejecutar playbook evitando unos tags
+ansible-playbook example.yml --skip-tags "packages"
+
+# Ver lista de tasks con esos tags
+ansible-playbook example.yml --tags "configuration,packages" --list-tasks
+
+
+ansible-playbook example.yml --list-tags
+
+
+
+
+---
+
+# Tasks:
+
+## mkdir
+- name: mkdir directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}" 
+    mode: "{{ item.mode }}" 
+  with_items:  
+    - { path: "/usr/local/bin/scripts_correo", owner: "root", group: "root", mode: '0755' }
+
+## link
+- name: Enlaces simbólico desde /usr/local/bin/scripts_correo a /usr/local/bin/
+  ansible.builtin.file: 
+    src: "/opt/jdk_8u202_setuid/jre/lib/amd64/jli/libjli.so"
+    dest: "/usr/lib64/libjli.so"
+    state: link
+
+
+
+
+## Copy
+- name: Creamos ficheros Vacios necesarios para los scripts
+  ansible.builtin.copy:
+    content: ""
+    dest: "{{ item.path }}"
+    group: "{{ item.group }}"
+    owner: "{{ item.owner }}"
+    force: no
+    mode: '0644'
+  with_items:  
+    - { path: "/usr/local/cache/bajas.conf", owner: "root", group: "root" }
+
+
+## Templates
+- name: Copiamos los scripts que tenemos como Templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '{{ item.mode }}'
+  with_items:  
+    - { src: "usr/local/etc/check_cuota.conf.j2", dest: "/usr/local/etc/check_cuota.conf", mode: "0644" }
+
+
+## PAQUETERIA
+- name: Instalar Paquetes necesarios para los scripts
+  package:
+    name:
+     - rblcheck
+    state: present
+
+
+
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/systemd_module.html
+# https://docs.ansible.com/ansible/latest/collections/ansible/builtin/copy_module.html
+
+
+
+---
+## WGET
+# https://docs.ansible.com/ansible/latest/modules/get_url_module.html
+- name: wget https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz -O /tmp/roundcubemail-1.4.9-complete.tar.gz
+  ansible.builtin.get_url:
+    url: https://github.com/roundcube/roundcubemail/releases/download/1.4.9/roundcubemail-1.4.9-complete.tar.gz
+    dest: /tmp/roundcubemail-1.4.9-complete.tar.gz
+
+
+## targz || unzip
+- name: Extract /tmp/roundcubemail-1.4.9-complete.tar.gz into /var/www/html/
+  ansible.builtin.unarchive:
+    src: /tmp/roundcubemail-1.4.9-complete.tar.gz
+    dest: /var/www/html/
+    remote_src: yes
