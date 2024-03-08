@@ -1,56 +1,104 @@
-Consultar el estado del cluster: 
+# Consultar el estado del cluster: 
+```bash
 curl -XGET http://c04a:8902/_cluster/health?pretty -s   
-curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/state?pretty -s 
+curl -XGET --user elastic:XXXXXX http://c04a:8902/_cluster/state?pretty -s 
+```
 
-
-##################################################################33
-ENABLE REALLOCATION:
-curl -XPUT --user elastic:X4Elastyc-H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" }}'
-
-DISABLE REALLOCATION:
-curl -XPUT --user elastic:X4Elastyc -H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "none" }}'
-
-CHECK SETTINGS (entre ellas si el reallocation está ON/OFF):
-curl -XGET --user elastic:X4Elastyc http://c04a:8902/_cluster/settings?pretty
-
-# Donarli chicha
-curl -sSkLXPUT --user "elastic:X4Elastyc"  localhost:8922/_cluster/settings?pretty -d ' {"transient" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "200", "cluster_concurrent_rebalance" : "200", "node_initial_primaries_recoveries" : "200"  } } } } }' -H 'Content-Type: application/json'
-
-Estdo indices
-curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8932/_cat/indices?pretty&pretty' -s  | grep -v "green"
-
-Estado de las colas
-curl -XGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'http://ela01a:8902/_cat/thread_pool/?v&h=node_name,host,name,port,queue,queue_size,rejected,active,size,min,max,keep_alive'
-
-Consultar el estado de todos los nodos de un cluster:
+# Consultar el estado de todos los nodos de un cluster:
+```bash
 curl  -XGET "http://c04a:8902/_nodes/_all/info?pretty" -s
+```
 
-##################################################################33
-
-Consultar el estado de un nodo en concreto:
-curl -XGET 'http://c04a:8902/_nodes/c04a/stats?pretty' -s
-
-Consultar Info y estadísticas del cluster (docs., tamaño, etc)
+# Consultar Info y estadísticas del cluster (docs., tamaño, etc)
+```bash
 curl -XGET "http://c04a:8902/_stats?pretty" -s
+```
 
+# Estado indices
+```bash
+curl -XGET --user elastic:XXXXXX -H 'Content-Type: application/json' 'http://ela01a:8932/_cat/indices?pretty' -s  | grep -v "green"
+```
 
+# Estado de las colas
+```bash
+curl -kXGET --user elastic:XXXXXX -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/thread_pool/?v' -s
 
+curl -XGET --user elastic:XXXXXX -H 'Content-Type: application/json' 'http://ela01a:8902/_cat/thread_pool/?v&h=node_name,host,name,port,queue,queue_size,rejected,active,size,min,max,keep_alive'
+```
+ 
+# Para ver porque no se alojan los indices
+```bash
+curl -XGET localhost:9200/_cluster/allocation/explain?pretty
+```
 
-Colas ESM
-curl -kXGET --user elastic:X4Elastyc -H 'Content-Type: application/json' 'https://elasticesm.edicom.es:443/_cat/thread_pool/?v' -s
+# Allocation
+## ENABLE REALLOCATION:
+```bash
+curl -XPUT --user elastic:XXXXXX-H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "all" }}'
+```
+
+## DISABLE REALLOCATION:
+```bash
+curl -XPUT --user elastic:XXXXXX -H 'Content-Type: application/json' http://c04a:8902/_cluster/settings -d '{ "transient" : { "cluster.routing.allocation.enable" : "none" }}'
+```
+
+# Donarli chicha al allocation
+```bash
+curl -sSkLXPUT --user "XXXXX:XXXXXX"  localhost:8922/_cluster/settings?pretty -d ' {"transient" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "200", "cluster_concurrent_rebalance" : "200", "node_initial_primaries_recoveries" : "200"  } } } } }' -H 'Content-Type: application/json'
+```
+
+# CHECK SETTINGS (entre ellas si el reallocation está ON/OFF):
+```bash
+curl -XGET --user elastic:XXXXXX http://c04a:8902/_cluster/settings?pretty
+```
+
+# Quitarle el tag de hotwarm
+```bash
+curl -XPUT -H 'Content-Type: application/json' -u elastic:XXXXXX "http://${ip_cluster}/${indice}/_settings" -d '{  "settings": { "index.routing.allocation.require.box_type" : null } }'
+````
+
+# Snapshot
+## Ver snapshot
+```bash
+curl --user "elastic:XXXXXX" -sSkLXGET 'ela01c:8922/_snapshot/backup_elapool1/_all?pretty' | grep -E "\"state\"|\"snapshot\" : \"elapool1"
+```
+
+## Crear snapshot
+```bash
+PUT _snapshot/mo_es_offloading_index
+```
+
+## Crear el schedule de los snapshots
+```bash
+PUT /_slm/policy/daily_snapshot
+{
+  "schedule" : "0 0/60 * * * ?",
+  "name": "<pla1-daily-snap-{now/d}>", 
+  "repository": "mo_es_offloading_index", 
+  "config": { 
+    "indices": ["logstash-*"] 
+  },
+  "retention": { 
+    "expire_after": "60d", 
+    "min_count": 5, 
+    "max_count": 50 
+  }
+}
+```
+
+##################################################################
+
 
 # KUBECONFIG
 file=admin.conf.old; echo "$(cat $file| grep -i certificate | grep client |awk  '{print $2}')" | base64 -d > /tmp/tmpfile; openssl x509 -in /tmp/tmpfile -text -noout
+
 kubeadm alpha kubeconfig user --client-name kubernetes-admin --org system:masters > admin.conf
+
 file=admin.conf ; echo "$(cat $file| grep -i certificate | grep client |awk  '{print $2}')" | base64 -d > /tmp/tmpfile; openssl x509 -in /tmp/tmpfile -text -noout
 
 
-DARLE TRAYA
-curl -skXPUT --user elastic:X4Elastyc -H 'Content-Type: application/json'  https://elasticesm.edicom.es:443/_cluster/settings?pretty -d ' {"persistent" : { "cluster" : {"routing" : {"allocation" : {"node_concurrent_recoveries" : "10", "cluster_concurrent_rebalance" : "10", "node_initial_primaries_recoveries" : "10"  } } } } }'
-
-Quitarle el tag de hotwarm
-curl -XPUT -H 'Content-Type: application/json' -u elastic:X4Elastyc "http://${ip_cluster}/${indice}/_settings" -d '{  "settings": { "index.routing.allocation.require.box_type" : null } }'
 
 
-Crear snapshot
-curl --user "elastic:X4Elastyc" -sSkLXGET 'ela01c:8922/_snapshot/backup_elapool1/_all?pretty' | grep -E "\"state\"|\"snapshot\" : \"elapool1"
+
+
+

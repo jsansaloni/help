@@ -1,0 +1,56 @@
+# Si el keeper slave no sincroniza y se queda esperando al wal o al checkpoint del master, conectar al master actual y ejecutar:
+```bash
+CHECKPOINT;
+```
+# Display the current cluster status
+$stolonctl --cluster-name=postgres --store-backend=kubernetes --kube-resource-kind=configmap status
+
+# Update pg parámeters
+$stolonctl --cluster-name=postgres --store-backend=kubernetes --kube-resource-kind=configmap update --patch '{ "pgParameters" : {"effective_cache_size" : "15GB" }}'
+
+
+# Manage current cluster data
+```SQL
+stolonctl clusterdata
+```
+
+# Force keeper as "temporarily" failed. The sentinel will compute a new clusterdata considering it as failed and then restore its state to the ```SQL
+real 
+```
+stolonctl failkeeper
+
+# Initialize a new clusterone.
+```SQL
+stolonctl init
+```
+
+# Promotes a standby cluster to a primary cluster
+```SQL
+stolonctl promote
+```
+
+# Register stolon keepers for service discovery
+```SQL
+stolonctl register
+```
+
+# Removes keeper from cluster data
+```SQL
+stolonctl removekeeper
+```
+
+# Retrieve the current cluster specification
+```SQL
+stolonctl spec
+```
+
+# Update a cluster specification
+```SQL
+stolonctl update
+```
+
+# Display the version
+```SQL
+stolonctl version
+```
+

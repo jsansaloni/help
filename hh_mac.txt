@@ -1,0 +1,14 @@
+# netstat -putonl
+sudo lsof -nP -i4TCP:$PORT | grep LISTEN
+
+# route -n in linux
+netstat -rn
+
+
+# delete route vpn
+route delete -net 173.243.40.110 -ifp ppp0
+
+
+# add route to interface
+$ sudo route add  -host 143.131.222.131/32 -interface en0
+add host 143.131.222.131: gateway en0

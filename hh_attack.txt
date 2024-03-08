@@ -1,0 +1,1 @@
+$ curl -A "129.0|android|5.1.1|SM-G9350" "https://tienda.mercadona.es/?nocache=jsansalo2"

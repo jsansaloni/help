@@ -12,6 +12,13 @@ lvresize -L +500G /dev/mapper/4tb-images
 xfs_growfs /dev/data/backup
 btrfs filesystem resize max /var/lib/libvirt/images
 
+## Entends volume
+```bash
+$ lvextend -L+100GB /dev/vg-data/data
+
+$ resize2fs /dev/vg-data/data # ext4
+
+```
 
 # HD Performance
 sync; dd if=/dev/zero of=tempfile bs=1M count=10240; sync; /sbin/sysctl -w vm.drop_caches=3; dd if=tempfile of=/dev/null bs=1M count=10240; rm tempfile

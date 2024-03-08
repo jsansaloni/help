@@ -1,0 +1,16 @@
+## Revert last commit in remote branch
+```bash
+git reset --soft HEAD~1
+git push origin +HEAD
+```
+
+## Volver a la rama anterior
+```bash
+git switch -
+git checkout -
+```
+
+## Git log con ramitas
+```bash
+git log --pretty=oneline --graph --decorate --all
+``` 

@@ -1,0 +1,3 @@
+
+# Reload config prometheus
+curl -XPOST 'http://prometheus.sta.monline/-/reload'

@@ -1,0 +1,39 @@
+
+## Gcloud tool
+### Use a docker image to run gcloud commands
+```docker run -it  -v $PWD/Downloads/prod-mercadona-4e88b8f7160f.json:/service_account.json google/cloud-sdk bash```
+
+## Login 
+```gcloud auth login```
+
+### Check if you are login correctly 
+```gcloud auth list``
+
+### Auth with service account (SA)
+```gcloud auth activate-service-account --key-file /service_account.json```
+
+### Configure GCR(Google Cloud Registry) 
+```gcloud auth configure-docker```
+
+## K8s
+### Get credentials for staging cluster
+```gcloud container clusters get-credentials itg-sta --zone europe-west1-b --project itg-mimercadona```
+
+
+## Config
+### Config project
+```gcloud config set project prod-mercadona```
+
+
+## DDBB / SQL
+### Delete DDBB
+```gcloud sql databases delete ntc-picking-api-formation-01 --instance=in-store-formation-envs --quiet```
+
+###  Delete DB User
+```gcloud sql users delete ntc_picking_api_rw_formation-01 --instance=in-store-formation-envs --quiet```
+
+
+## BigQuery
+
+### Select table
+``` bq query --nouse_legacy_sql 'select * from mercatonic_mart.mercatonic_horas_procesos_MOMO' limit 100```

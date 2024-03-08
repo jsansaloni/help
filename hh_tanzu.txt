@@ -1,0 +1,115 @@
+
+## 1. SSH
+###  SRE Machine
+```
+STA:
+ssh 10.196.175.252 -l sre
+
+PROD:
+ssh 172.16.98.246 -l sre
+```
+
+#### kubeconfig mng-cluster location
+```
+cat .kube-tkg/config
+```
+
+### Para entrar a las vm de tanzu
+ ssh -i .ssh/sre-cluster-id capv@172.16.98.250
+
+## Tanzu command
+
+### List clusters
+```bash
+$ tanzu cluster  list
+```
+
+### show specific cluster
+```bash
+$tanzu cluster get zonafranca -n zonafranca
+```
+
+### Delete cluster
+```bash
+# tkg delete mc <my-management-cluster>
+```
+
+### Create management cluster
+```bash
+tanzu management-cluster create -f <CLUSTER_YML> -v 9
+```
+
+
+
+## 1 Create MNG cluster
+
+
+### Levantar UI
+```bash
+tanzu management-cluster create --ui -b 0.0.0.0:8080
+```
+
+``` Prod config
+VCENTER SERVER  pvvgo0034.ccv.mercadona.com
+USERNAME    mercanetes@MERCADONA.LOCAL
+PASSWORD    ***********
+VSPHERE INSECURE CONNECTION no
+DATACENTER  /Plaza_America
+SSH PUBLIC KEY  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZYkYFllpk3slLaW51FgOjI0QKrgN5fHXoK0gPaO/oA6dxGfDsVD7rkmiVJcNLUGwaPcN3ymg9251N30/wAOeeeJCoqhjB2X+GXUZbbWV+KYPTPnk1XA9lzyd+gB/6CRLOYiz+aRTjrjUv3sib5iszvqfv+xFLysZpXM1km7pERb33yF54gBTwTU7cRUAqtnmXR5a58miIsPKxXrXrlH2tFYvkqxsGPNGvuPygnKE9et94DJsVi+nswc2VzHeW4XITF3ruYlP+X6RoqcjEB+11Vm3e8/1V8NO83OA8v5s0VvwycoGTCLxPJAS7dwWIKG8YoEOv/lLqVDRL4DE4lljnMwvJnY0TFhnRWhO1e9GO4SuK2rFV5w0slvLdoWkUf7v/NM8w6n9QBYqVin7whLPD4+bN97Mp9/MzqOqwRt0IdhIBMN3MXHeA7apml64P2r0oUGNQpUVVMj2BgTprEOpnKJ68HFM+mYeMeZt/312rPwr2IeTVU0OscfK5gpUXNGLpT4nyIMQO+8lY4qhptp1ko2Enq6/lBZVejH1bVMNohimcfJ0mWKf2yaH8x3QFQKQn5fjoDkT7AwtR4Vqd0WtC6sl8KzaGQ8nawM0Pu5PBQL95nxDPz6VtPDvw3wGDvJdgELcdOoHal04YvTJa5PpmikwLRnWGO7pL3VbAJPR8Gw== sre@sre
+
+---
+
+DEVELOPMENT INSTANCE TYPE   
+PRODUCTION INSTANCE TYPE    small (cpu: 2, ram: 4 GB, disk: 20 GB)
+MANAGEMENT CLUSTER NAME (OPTIONAL)  mgmt-prod-tkg-15
+ENABLE MACHINE HEALTH CHECKS    yes
+CONTROL PLANE ENDPOINT PROVIDER     Kube-vip
+CONTROL PLANE ENDPOINT  10.196.175.195
+WORKER NODE INSTANCE TYPE   small (cpu: 2, ram: 4 GB, disk: 20 GB)
+ENABLE AUDIT LOGGING    no
+---
+Resources   Resource Pool: /Plaza_America/host/Plaza_America-Cluster/Resources, VM Folder: /Plaza_America/vm, Datastore: /Plaza_America/datastore/vsanDatastore
+VM FOLDER   /Plaza_America/vm
+DATASTORE   /Plaza_America/datastore/vsanDatastore
+RESOURCE POOL   /Plaza_America/host/Plaza_America-Cluster/Resources
+
+---
+CNI PROVIDER    antrea
+NETWORK NAME    /Plaza_America/network/VSAN_OODEVLMAQUINAS_VIRTUALES_NUEVA
+CLUSTER SERVICE CIDR    192.168.128.0/17
+CLUSTER POD CIDR    192.168.0.0/17
+ENABLE PROXY SETTINGS   no
+```
+
+
+> Antes de levantar el cluster si queremos cambiar el número de workeres editamos el yaml generado por la UI. Para poner un solo worker añadir la siguiente variable `WORKER_MACHINE_COUNT: 1`
+
+### Creamos el cluster
+tanzu management-cluster create mgmt-prod-tkg-15  --file /home/sre/.config/tanzu/tkg/clusterconfigs/3rlbx2qlme.yaml -v 6
+N
+Y
+
+
+--- 
+
+### Install velero
+
+#### Versión vieja
+```bash
+ ~$ velero install --provider=gcp --plugins velero/velero-plugin-for-gcp:v1.2.0 --bucket=mercadona_online_velero_backups --secret-file=./credentials-velero --image eu.gcr.io/itg-mimercadona/velero:v1.5.4
+```
+
+#### Versión Nueva
+```bash
+ ~$ velero install --provider=gcp --plugins velero/velero-plugin-for-gcp:v1.2.0 --bucket=mercadona_online_velero_backups --secret-file=./credentials-velero --image eu.gcr.io/itg-mimercadona/velero:v1.5.4
+```
+
+### Get Backup list
+```bash
+~$ velero get backup
+```
+
+### Restore Backup
+```bash
+~$ velero create restore --from-backup=tanzu-management-pro-14-20220223000009
+```

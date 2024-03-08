@@ -1,0 +1,87 @@
+https://zackreed.me/installing-nut-on-ubuntu/
+
+Por hacer
+
+## Start servicio
+```bash
+root@microserver:/etc/nut #upsdrvctl start
+	Network UPS Tools - UPS driver controller 2.7.4
+	Network UPS Tools - Generic HID driver 0.41 (2.7.4)
+	USB communication driver 0.33
+	Using subdriver: APC HID 0.96
+```
+
+## Parar servicio
+```bash
+root@microserver:/etc/nut #upsd -c stop
+	Network UPS Tools upsd 2.7.4
+```
+
+## Stado del servicio
+```bash
+root@microserver:/etc/nut #upsd
+	Network UPS Tools upsd 2.7.4
+	fopen /run/nut/upsd.pid: No such file or directory
+	listening on ::1 port 3493
+	listening on 127.0.0.1 port 3493
+	Connected to UPS [apc-1500]: usbhid-ups-apc-1500
+```
+
+## Estado del UPS
+```bash
+root@microserver:/etc/nut #upsc apc-1500@localhost ups.status
+	Init SSL without certificate database
+	OL
+```
+
+## Estado del UPS
+```bash
+root@microserver:/etc/nut #upsc apc-1500@localhost
+	Init SSL without certificate database
+	battery.charge: 100
+	battery.charge.low: 10
+	battery.charge.warning: 50
+	battery.mfr.date: 2018/02/14
+	battery.runtime: 6120
+	battery.runtime.low: 120
+	battery.temperature: 35.1
+	battery.type: PbAc
+	battery.voltage: 27.3
+	battery.voltage.nominal: 24.0
+	device.mfr: American Power Conversion
+	device.model: Smart-UPS 1500 RM
+	device.serial: AS0404311282
+	device.type: ups
+	driver.name: usbhid-ups
+	driver.parameter.pollfreq: 30
+	driver.parameter.pollinterval: 2
+	driver.parameter.port: auto
+	driver.parameter.synchronous: no
+	driver.version: 2.7.4
+	driver.version.data: APC HID 0.96
+	driver.version.internal: 0.41
+	input.sensitivity: high
+	input.transfer.high: 253
+	input.transfer.low: 208
+	input.voltage: 214.5
+	output.frequency: 50.0
+	output.voltage: 214.5
+	output.voltage.nominal: 240.0
+	ups.beeper.status: disabled
+	ups.delay.shutdown: 20
+	ups.delay.start: 30
+	ups.firmware: 617.3.I
+	ups.firmware.aux: 1.5
+	ups.load: 0.0
+	ups.mfr: American Power Conversion
+	ups.mfr.date: 2004/01/22
+	ups.model: Smart-UPS 1500 RM
+	ups.productid: 0002
+	ups.serial: AS0404311282
+	ups.status: OL
+	ups.test.result: No test initiated
+	ups.timer.reboot: -1
+	ups.timer.shutdown: -1
+	ups.timer.start: -1
+	ups.vendorid: 051d
+```

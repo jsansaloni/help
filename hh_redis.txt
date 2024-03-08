@@ -1,0 +1,2 @@
+# Get the redis db length
+redis-cli -h es-redis.services -p 6379 LLEN filebeat
