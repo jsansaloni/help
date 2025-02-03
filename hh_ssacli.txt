@@ -44,8 +44,15 @@ cat /proc/mdstat
 ```
 
 ### Show detail 
-```
+```bash
 mdadm --detail /dev/md0
+```
+
+### Persist Raid
+```bash
+sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
+
+sudo update-initramfs -u
 ```
 
 ### Mark the disk as failed
@@ -64,10 +71,16 @@ After replace the faulty disk with new one
 sfdisk -d /dev/sda | sfdisk /dev/sdb
 ```
 
-### Create mirror
-Add the new HDD to the raid
+### Add the new HDD to the raid
 ```bash
 mdadm --manage /dev/md0 --add /dev/sdb1
+```
+
+
+### Recreate Raid when could not be recovered without losing data
+Try this in one of two raids
+```bash
+mdadm --create --assume-clean  --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sda missing
 ```
 
 
