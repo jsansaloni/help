@@ -25,3 +25,64 @@ sync; dd if=/dev/zero of=tempfile bs=1M count=10240; sync; /sbin/sysctl -w vm.dr
 
 hdparm -Tt /dev/sda
 
+
+# Extend disk tha contain and LVM partition
+
+## 1. Redimensionar el disco (proxmox GUI)
+
+
+## 2. Redimensionar la partición
+
+Desmontar la particion que queremos extender
+
+parted /dev/mapper/pve-vm--102--disk--0 
+
+
+(parted) print
+Model: Linux device-mapper (thin) (dm)
+Disk /dev/mapper/pve-vm--102--disk--0: 70.9GB
+Sector size (logical/physical): 512B/512B
+Partition Table: gpt
+Disk Flags: 
+
+Number  Start   End     Size    File system  Name  Flags
+ 1      1049kB  2097kB  1049kB                     bios_grub
+ 2      2097kB  2150MB  2147MB  ext4
+ 3      2150MB  53.7GB  51.5GB
+
+
+
+(parted) resizepart 3
+End?  [53.7GB]? 100%                                                      
+
+
+(parted) quit                                                             
+
+
+## 3. Extender el LVM
+
+### Extendemos el PV
+pvresize /dev/vda3
+
+pvs
+
+vgdisplay
+
+
+### Extendemos el VG
+vgextend NombreVG /dev/vda3
+
+vgs
+
+### Extendemos el LVM
+lvextend -l +100%FREE /dev/mapper/ubuntu--vg-dockers
+
+lvs
+
+### Extender la partición que está dentro del lvm
+
+#### XFS
+xfs_growfs
+
+#### ext4
+resize2fs /dev/mapper/ubuntu--vg-dockers
