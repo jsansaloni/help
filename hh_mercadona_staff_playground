@@ -1,0 +1,23 @@
+## One task FastApi PROD
+curl -s -X POST 'http://staff-playground-django.prod.monline/tasks/' -H 'Content-Type: application/json' -d '{"number": null, "title": "Task x", "description": "description task"}'
+
+## One task FastApi PROD
+curl -s -X POST 'http://staff-playground.prod.monline/tasks/' -H 'Content-Type: application/json' -d '{"number": null, "title": "Task x", "description": "description task"}'
+
+## One task FastApi LOCAL
+curl -s -X POST 'http://localhost:8010/tasks/' -H 'Content-Type: application/json' -d '{"number": null, "title": "Task x", "description": "description task"}'
+
+## One task Django LOCAL
+curl -s -X POST 'http://localhost:8011/tasks/' -H 'Content-Type: application/json' -d '{"number": null, "title": "Task x", "description": "description task"}'
+
+## Many tasks FastApi PROD
+ab -n 1000 -c 30 -v 1 -T application/json -p /Users/jsansalo/tmp/staff-playground/open_task_content.json http://staff-playground.prod.monline/tasks/
+
+## Many tasks Django PROD
+ab -n 1000 -c 30 -v 1 -T application/json -p /Users/jsansalo/tmp/staff-playground/open_task_content.json http://staff-playground-django.prod.monline/tasks/
+
+## Many tasks FastApi LOCAL
+ab -n 20000 -c 30 -v 1 -T application/json -p /Users/jsansalo/tmp/staff-playground/open_task_content.json http://localhost:8010/tasks/
+
+## Many tasks Django LOCAL
+ab -n 20000 -c 30 -v 1 -T application/json -p /Users/jsansalo/tmp/staff-playground/open_task_content.json http://localhost:8011/tasks/

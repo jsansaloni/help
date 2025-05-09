@@ -31,6 +31,14 @@ postgres=# \dx
 
 ```
 
+#####  List of users
+
+```
+postgres=# \du
+```
+
+
+
 ### Stop connections in a DB and Delete DB and User
 ```
 REVOKE CONNECT ON DATABASE "v6-stocks-s999" FROM PUBLIC;
@@ -78,6 +86,14 @@ SELECT pg_terminate_backend(PID);
 ```bash
 psql -U $PGUSER -p $PGPORT -w -h $PGHOST -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '"$1"';"
 ```
+
+
+### Drop database with connections
+
+```bash
+DATABASE_NAME='test'; psql -U $PGUSER -p $PGPORT -w -h $PGHOST -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DATABASE_NAME}';DROP DATABASE ${DATABASE_NAME}"
+```
+
 
 ## Sizes / Tamaños
 

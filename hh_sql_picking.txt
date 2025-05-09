@@ -1,0 +1,38 @@
+
+# Querie estandar Picking
+
+```sql
+SELECT
+	a.id as area_id, a.name as area_name,
+	p.merca_code as merca_code, p.name as product_name, -- p.price as product_price, p.variable_weight as product_variable_weight, p.produced as product_produced
+	ms.code as shift_code, -- ms.name as shift_name,
+	-- mw.name as wave_code, mw.display_name as wave_display_name
+	co.service_date,
+
+	o.*
+
+FROM operation o
+INNER join customer_order co on co.reference = o.customer_order_reference
+INNER join sales_customerorderareainfo sc on sc.customer_order_reference = co.reference
+INNER JOIN manufacturing_waves mw on mw.id = sc.manufacturing_wave_id
+INNER JOIN manufacturing_shift ms on ms.id = mw.manufacturing_shift_id and ms.code = 'morning'
+INNER JOIN products p on p.id = o.product_id
+INNER JOIN area a on a.id = p.area_id and a.id = 3
+WHERE co.service_date = '2025-02-06'
+
+;
+```
+
+## Productos de las operaciones de un service date y un shift 
+```sql
+select o.id as operation_id, p.name, p.group_name, s.code, w.display_name, w.name, co.service_date, a.*
+from operation o
+INNER JOIN sales_customerorderareainfo a on  a.customer_order_reference = o.customer_order_reference and o.batch_id = a.batch_id
+INNER JOIN manufacturing_waves w on a.manufacturing_wave_id = w.id
+INNER JOIN manufacturing_shift s on s.id = w.manufacturing_shift_id and s.code='morning'
+INNER JOIN products p on o.product_id = p.id AND p.group_name='LpC'
+INNER JOIN customer_order co on co.reference = a.customer_order_reference and co.service_date='2025-02-20'
+
+-- order by o.id
+;
+```
